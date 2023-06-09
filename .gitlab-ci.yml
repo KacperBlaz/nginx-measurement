@@ -10,11 +10,12 @@ variables:
 repo_integration:
   stage: integration
   tags:
-    - jumphost
-  before_script:
-    - chmod 400 $MASTER_NODE_PRIVATE_KEY
+    - local
+    - shell
+ # before_script:
+ #   - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
-        - ssh -o StrictHostKeyChecking=no vagrant@$MASTER_IP_ADDRESS "
+       # - ssh -o StrictHostKeyChecking=no vagrant@$MASTER_IP_ADDRESS "
             git clone $SOURCE_REPOSITORY
             ls"
           
