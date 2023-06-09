@@ -1,0 +1,22 @@
+stages:
+  - integration
+  - build
+  - test
+  - deploy
+
+variables:
+  SOURCE_REPOSITORY: https://github.com/Joginator4/nginx-measurement.git
+
+repo_integration:
+  stage: integration
+  script:
+        - ssh -o StrictHostKeyChecking=no -o UserKnownHostFiles=/dev/null -i $MASTER_NODE_PRIVATE_KEY vagrant@MASTER_IP_ADDRESS "
+          git clone $SOURCE_REPOSITORY
+          
+
+#build_container:
+#  stage: build
+#  script:
+#    - ssh -o StrictHostKeyChecking=no -o UserKnownHostFiles=/dev/null -i $MASTER_NODE_PRIVATE_KEY vagrant@MASTER_IP_ADDRESS "
+#      "
+    
