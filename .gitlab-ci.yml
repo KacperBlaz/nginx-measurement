@@ -1,5 +1,3 @@
-image: python:alpine3.17
-
 stages:
   - integration
   - build
@@ -11,9 +9,14 @@ variables:
 
 repo_integration:
   stage: integration
+  tags:
+    - bastion
+    - shell
+  before_script:
+    - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
         - ssh -o StrictHostKeyChecking=no -o UserKnownHostFiles=/dev/null -i $MASTER_NODE_PRIVATE_KEY vagrant@MASTER_IP_ADDRESS "
-          git clone $SOURCE_REPOSITORY"
+            git clone $SOURCE_REPOSITORY"
           
 
 #build_container:
