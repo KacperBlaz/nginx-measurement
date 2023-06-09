@@ -10,8 +10,7 @@ variables:
 repo_integration:
   stage: integration
   tags:
-    - bastion
-    - shell
+    - jumphost
   before_script:
     - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
