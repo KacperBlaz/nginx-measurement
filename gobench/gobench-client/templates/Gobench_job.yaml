@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Job
+metadata:
+  name: gobench-client-{{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: gobench-client
+  template:
+    metadata:
+      labels:
+        app: gobench-client
+    spec:
+      imagePullSecrets: {{ .Values.image.imagePullSecrets }}
+      imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+      containers:
+      - name: gobench-client
+        image: nginx
+        ports:
+        - containerPort: {{ .Values.image.container-port }}
+      resources:
+        limits:
+          memory: 4Gi
+        requests:
+          memory: 1Gi
+      volumeMounts:
+      - name: nginx-volume
+        mountPath: /etc/nginx/nginx.conf
+        subPath: nginx.conf
+      volumes:
+      - name: nginx-configmap
+        configMap:
+          name: nginx-configmap
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.NodeSelector }}

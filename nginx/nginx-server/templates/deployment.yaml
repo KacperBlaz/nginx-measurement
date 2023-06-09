@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-server-{{ .Release.Name }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      imagePullSecrets: {{ .Values.containers.imagePullSecrets }}
+      imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
+      containers:
+      - name: {{ .Values.containers.name }}
+        image: nginx
+        ports:
+        - containerPort: {{ .Values.containers.container-port }}
+      resources:
+        limits:
+          memory: {{ .Values.resources.limits.memory }}
+        requests:
+          memory: {{ .Values.resources.requests.memory }}
+      volumeMounts:
+      - name: nginx-volume
+        mountPath: /etc/nginx/nginx.conf
+        subPath: nginx.conf
+      volumes:
+      - name: nginx-configmap
+        configMap:
+          name: nginx-configmap
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.NodeSelector }}
