@@ -16,8 +16,6 @@ spec:
       containers:
       - name: gobench-client
         image: nginx
-        ports:
-        - containerPort: {{ .Values.image.container-port }}
       resources:
         limits:
           memory: 4Gi

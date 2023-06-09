@@ -1,1 +1,30 @@
+image:
+  name: gobench-client
+  repo: nginx
+  tag: 5.0
+  imagePullPolicy: IfNotPresent
+  restartPolicy: Never
 
+imageCredentials:
+  registry: 
+  username: 
+  password: 
+
+securityContext:
+  allowPrivilegeEscalation: true
+  privileged: true
+  runAsUser: 0
+
+env:
+  NODE_SELECTOR: worker-node01
+  SERVER_IP: 172.100.29.100
+
+## This is name of folder which files are extracted in bastion host ##
+
+folder:
+  name: 
+
+
+sshpass:
+  rsync_server: """
+  rsync_password:
