@@ -12,8 +12,8 @@ repo_integration:
   tags:
     - bastion
     - shell
- # before_script:
- #   - chmod 400 $MASTER_NODE_PRIVATE_KEY
+  before_script:
+    - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
          - ssh -o StrictHostKeyChecking=no -i $MASTER_NODE_PRIVATE_KEY vagrant@$MASTER_IP_ADDRESS "
              git clone $SOURCE_REPOSITORY &&
