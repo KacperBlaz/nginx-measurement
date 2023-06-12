@@ -15,14 +15,5 @@ repo_integration:
   before_script:
     - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
-         - ssh -o StrictHostKeyChecking=no -i $MASTER_NODE_PRIVATE_KEY vagrant@$MASTER_IP_ADDRESS "
-             git clone $SOURCE_REPOSITORY &&
-             ls"
-          
-#
-#build_container:
-#  stage: build
-#  script:
-#    - ssh -o StrictHostKeyChecking=no -o UserKnownHostFiles=/dev/null -i $MASTER_NODE_PRIVATE_KEY vagrant@MASTER_IP_ADDRESS "
-#      "
-    
+         - ssh -o StrictHostKeyChecking=no -i $MASTER_NODE_PRIVATE_KEY vagrant@$MASTER_IP_ADDRESS
+         - ls
