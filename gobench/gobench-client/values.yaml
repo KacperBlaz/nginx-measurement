@@ -22,9 +22,9 @@ env:
 ## This is name of folder which files are extracted in bastion host ##
 
 folder:
-  name: 
+  name: Nginx_Result
 
 
 sshpass:
-  rsync_server: """
+  rsync_server: ""
   rsync_password:

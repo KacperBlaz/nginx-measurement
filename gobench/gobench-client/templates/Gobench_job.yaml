@@ -4,21 +4,16 @@ metadata:
   name: gobench-client-{{ .Release.Name }}
   labels:
     app: gobench-client
-  annotations:
-    k8s.v1.cni.cncf.io/networks: ovs-green-net, ovs-red-net
 spec:
   template:
     metadata:
       annotations:
-        k8s.v1.cni.cncf.io/networks: ovs-green-net, ovs-red-net
     spec:
       containers:
       - name: {{ .Values.image.name }}
         image: {{ .Values.image.repo }}/{{ .Values.image.tag }}
+        imagePullSecrets: {{ .Values.image.ImagePullSecrets }}
         imagePullPolicy: {{ .Values.image.ImagePullPolicy}}
-        env:
-        - name: SERVER_IP
-          value: {{ .Values.env.SERVER_IP }}
         securityContext:
           allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalataion }}
           privileged: {{ .Values.securityContext.privileged }}

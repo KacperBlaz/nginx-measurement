@@ -10,13 +10,14 @@ variables:
 repo_integration:
   stage: integration
   tags:
-    - local
+    - bastion
     - shell
  # before_script:
  #   - chmod 400 $MASTER_NODE_PRIVATE_KEY
   script:
        # - ssh -o StrictHostKeyChecking=no vagrant@$MASTER_IP_ADDRESS "
          - git clone $SOURCE_REPOSITORY
+         - ls
           
 #
 #build_container:
