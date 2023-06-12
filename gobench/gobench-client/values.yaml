@@ -17,7 +17,7 @@ securityContext:
 
 env:
   NODE_SELECTOR: worker-node01
-  SERVER_IP: 172.100.29.100
+  SERVER_IP: 
 
 ## This is name of folder which files are extracted in bastion host ##
 
