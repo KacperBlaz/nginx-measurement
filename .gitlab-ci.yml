@@ -14,11 +14,10 @@ repo_integration:
     - bastion
     - shell
   before_script:
-    - echo $MASTER_KEY > deploy-key.pem
-    - echo deploy-key.pem
-#    - echo $MASTER_NODE_PRIVATE_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
+    - echo $MASTER_KEY
+    - - echo $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
+    - cat deploy-key.pem
     - chmod 400 deploy-key.pem
-#    - cat deploy-key.pem
   script:
          - ssh -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS
          - ls
