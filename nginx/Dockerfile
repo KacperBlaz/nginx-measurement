@@ -1,5 +1,5 @@
 FROM ubuntu:focal
-LABEL gobench=client
+LABEL gobench=clien
 RUN apt update -y && apt install nginx -y \
     net-tools -y \
     ethtool -y
