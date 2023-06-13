@@ -22,7 +22,7 @@ build_nginx:
     MICROSERVICE_IMAGE_VERSION: "1.0"
   only:
     changes:
-      - "$MICROSERVICE_DIRECTORY/Dockerfile"
+      - "*/Dockerfile"
   before_script:
     - ls
   script:
@@ -43,7 +43,7 @@ build_gobench:
     GOBENCH_IMAGE_VERSION: "1.0"
   only:
     changes:
-      - "$MICROSERVICE_DIRECTORY/Dockerfile"
+      - "*/Dockerfile"
   before_script:
     - ls
   script:
