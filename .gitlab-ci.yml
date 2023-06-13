@@ -72,15 +72,3 @@ build_gobench:
 #         - ls -la
 #         - cd $MICROSERVICE_DIRECTORY
 #         - helm install nginx-server nginx-server/ &&
-
-.run_gobench_client:
-
-run_without_building:
-  extends:
-    - .run_nginx_server    
-
-run_with_building:
-  extends:
-    - .run_nginx_server
-  dependencies:
-    - build_nginx
