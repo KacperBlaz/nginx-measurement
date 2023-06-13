@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginx-server-{{ .Release.Name }}
 spec:
-  replicas: {{ .Values.deployment.replicas }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: nginx
@@ -12,7 +12,6 @@ spec:
       labels:
         app: nginx
     spec:
-      imagePullSecrets: {{ .Values.containers.imagePullSecrets }}
       imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
       containers:
       - name: {{ .Values.containers.name }}

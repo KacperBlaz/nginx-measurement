@@ -9,10 +9,15 @@ containers:
   imagePullPolicy: IfNotPresent
   container_port: 80
 
+imageCredentials:
+  registry: registry.gitlab.com/polyrepo_microservices/nginx-measurement/
+  username: admin
+  password: admin123
+
 resources:
   limits:
     memory: 4Gi
   requests:
     memory: 1Gi
 
-NodeSelector: master-node
+NodeSelector: worker-node01
