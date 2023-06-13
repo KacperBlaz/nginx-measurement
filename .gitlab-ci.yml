@@ -49,7 +49,7 @@ build_gobench:
     - docker build -t $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION .
     - docker push $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION
 
-run_test:
+.run_nginx_server:
   stage: test
   tags:
     - bastion
@@ -63,11 +63,24 @@ run_test:
   script:
          - ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
               docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-              cd /home/vagrant/gitlab_nginx/nginx-measurement/nginx &&
-              ls -l &&
-              helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD nginx-server/ "
+              cd /home/vagrant/gitlab_nginx/nginx-measurement/nginx "
+         - if [ -z "$CI_JOB_NAME=build_nginx" ]; then
+              helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD  nginx-server/ "
+           else
+              helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .image.tag=$MICROSERVICE_IMAGE_VERSION  nginx-server/ "
 #              kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
 #         - ls -la
 #         - cd $MICROSERVICE_DIRECTORY
 #         - helm install nginx-server nginx-server/ &&
-              
+
+.run_gobench_client:
+
+run_without_building:
+  extends:
+    - .run_nginx_server    
+
+run_with_building:
+  extends:
+    - .run_nginx_server
+  dependencies:
+    - build_nginx

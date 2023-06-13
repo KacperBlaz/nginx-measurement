@@ -12,7 +12,6 @@ spec:
       containers:
       - name: {{ .Values.image.name }}
         image: {{ .Values.image.repo }}/{{ .Values.image.tag }}
-        imagePullSecrets: {{ .Values.image.ImagePullSecrets }}
         imagePullPolicy: {{ .Values.image.ImagePullPolicy}}
         securityContext:
           allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalataion }}
