@@ -7,7 +7,7 @@ containers:
   tag: 1.0
   imagePullSecrets: microservice-docker-registry
   imagePullPolicy: IfNotPresent
-  container-port: 80
+  container_port: 80
 
 resources:
   limits:
