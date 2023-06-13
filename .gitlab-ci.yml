@@ -61,10 +61,10 @@ run_test:
     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
     - chmod 400 deploy-key.pem
   script:
-         - ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS
-         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-         - kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f -
-         - ls -la
-         - cd $MICROSERVICE_DIRECTORY
-         - helm install nginx-server nginx-server/ &&
+         - ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
+              docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
+              kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - | &&
+#         - ls -la
+#         - cd $MICROSERVICE_DIRECTORY
+#         - helm install nginx-server nginx-server/ &&
               
