@@ -1,24 +1,60 @@
 stages:
-  - integration
   - build
   - test
   - deploy
 
 variables:
-  SOURCE_REPOSITORY: https://github.com/Joginator4/nginx-measurement.git
   MASTER_KEY: $MASTER_NODE_PRIVATE_KEY
+  MICROSERVICE_DIRECTORY: ""
+  MICROSERVICE_NAME: ""
+  MICROSERVICE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/microservice/$MICROSERVICE_NAME"
+  MICROSERVICE_IMAGE_VERSION: ""
+  
 
-repo_integration:
-  stage: integration
+build_nginx:
+  stage: build
+  tags:
+    - bastion
+    - shell
+  variables:
+    MICROSERVICE_NAME: nginx
+    MICROSERVICE_DIRECTORY: nginx
+    MICROSERVICE_IMAGE_NAME: $CI_REGISTRY_IMAGE/$MICROSERVICE_NAME
+    MICROSERVICE_IMAGE_VERSION: 1.0
+  before_script:
+    - ls
+  script:
+    - echo "Logging to CR"; docker login -u $GITLAB_USER -p $GITLAB_PASSWORD $CI_REGISTRY
+    - cd $NGINX_MICROSERVICE_DIRECTORY
+    - docker build -t $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION .
+    - docker push $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION
+
+build_gobench:
+  stage: build
+  tags:
+    - bastion
+    - shell
+  variables:
+    MICROSERVICE_NAME: gobench
+    MICROSERVICE_DIRECOTRY: gobench
+    MICROSERVICE_IMAGE_NAME: $CI_REGISTRY_IMAGE/$MICROSERVICE_NAME
+    GOBENCH_IMAGE_VERSION:  1.0
+  before_script:
+    - ls
+  script:
+    - echo "Logging to CR"; docker login -u $GITLAB_USER -p $GITLAB_PASSWORD $CI_REGISTRY
+    - cd $NGINX_MICROSERVICE_DIRECTORY
+    - docker build -t $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION .
+    - docker push $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION
+
+run_test:
+  stage: test
   tags:
     - bastion
     - shell
   before_script:
-    - cat $MASTER_NODE_PRIVATE_KEY
-    - cat $MASTER_KEY
-    - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
-    - cat deploy-key.pem
+    - echo $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
     - chmod 400 deploy-key.pem
   script:
-         - ssh -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS
-         - ls
+         - ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS"
+              
