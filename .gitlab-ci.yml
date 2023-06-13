@@ -49,7 +49,7 @@ build_gobench:
     - docker build -t $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION .
     - docker push $MICROSERVICE_IMAGE_NAME/$MICROSERVICE_IMAGE_VERSION
 
-.run_nginx_server:
+run_nginx_server:
   stage: test
   tags:
     - bastion
