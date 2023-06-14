@@ -28,6 +28,7 @@ spec:
             date;/usr/bin/gobench -t 60 -c 100 -u http://{{ .Values.env.SERVER_IP }}/  > /mnt/$SERVER_IP.result.txt
             sshpass -p {{ .Values.sshpass.rsync_server_password }} scp -q -o StrictHostKeyChecking=no /mnt/$SERVER_IP.result.txt {{ .Values.sshpass.rsync_server_login }}@{{ .Values.sshpass.rsync_server_ip }}:{{ .Values.folder.name }}
             cat /mnt/$SERVER_IP.result.txt
+            sleep infinity
       restartPolicy: {{ .Values.containers.restartPolicy }}
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.env.NODE_SELECTOR }}
