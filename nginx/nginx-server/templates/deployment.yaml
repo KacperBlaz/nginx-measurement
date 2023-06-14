@@ -13,9 +13,11 @@ spec:
         app: nginx
     spec:
       imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
+      imagePullSecrets:
+      - name: {{ .Values.containers.imagePullSecrets.name }}
       containers:
       - name: {{ .Values.containers.name }}
-        image: nginx
+        image: {{ .Values.containers.repo }}/{{ .Values.containers.image_name }}/{{ .Values.containers.image_tag }}
         ports:
         - containerPort: {{ .Values.containers.container_port }}
       resources:

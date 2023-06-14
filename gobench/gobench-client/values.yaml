@@ -1,14 +1,19 @@
-image:
+containers:
   name: gobench-client
-  repo: nginx
-  tag: 5.0
+  repo: registry.gitlab.com/polyrepo_microservices/nginx-measurement
+  image_name: gobench
+  image_tag: "1.0"
   imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+    name: microservice-docker-registry
   restartPolicy: Never
 
+# Username and password are not real here , password are provided in pipeline to be dont shared !
+
 imageCredentials:
-  registry: 
-  username: 
-  password: 
+  registry: registry.gitlab.com/polyrepo_microservices/nginx-measurement/
+  username: admin
+  password: admin123
 
 securityContext:
   allowPrivilegeEscalation: true

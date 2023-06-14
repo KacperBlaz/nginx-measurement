@@ -9,10 +9,12 @@ spec:
     metadata:
       annotations:
     spec:
+      imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
+      imagePullSecrets:
+      - name: {{ .Values.containers.imagePullSecrets.name }}
       containers:
       - name: {{ .Values.image.name }}
-        image: {{ .Values.image.repo }}/{{ .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.ImagePullPolicy}}
+        image: {{ .Values.containers.repo }}/{{ .Values.containers.image_name }}/{{ .Values.containers.image_tag }}
         securityContext:
           allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalataion }}
           privileged: {{ .Values.securityContext.privileged }}
@@ -23,8 +25,6 @@ spec:
             /usr/local/bin/gobench -t 60 -c 100 -u http://{{ .Values.env.SERVER_IP }}/  > /mnt/result.txt
             sshpass -p {{ .Values.sshpass.rsync_password }} scp -q -o StrictHostKeyChecking=no /mnt/result.txt {{ .Values.sshpass.rsync_server }}/{{ .Values.scenario.name }}
             cat /mnt/result.txt
-      imagePullSecrets:
-            - name: repo-secret-{{ .Release.Name }}
-      restartPolicy: {{ .Values.image.restartPolicy }}
+      restartPolicy: {{ .Values.containers.restartPolicy }}
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.env.NODE_SELECTOR }}
