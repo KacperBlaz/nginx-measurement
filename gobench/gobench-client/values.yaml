@@ -22,7 +22,7 @@ securityContext:
 
 env:
   NODE_SELECTOR: worker-node01
-  SERVER_IP: 172.16.87.208
+  SERVER_IP: "192.168.0.0"
 
 ## This is name of folder which files are extracted in bastion host ##
 
@@ -31,6 +31,6 @@ folder:
 
 
 sshpass:
-  rsync_server_ip_address: ""
+  rsync_server_ip: ""
   rsync_server_login: ""
   rsync_server_password: ""
