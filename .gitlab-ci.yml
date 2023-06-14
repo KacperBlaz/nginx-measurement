@@ -78,7 +78,7 @@ build_gobench:
             echo $SERVER_IP &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
             cd /home/vagrant/gitlab_nginx/nginx-measurement/$MICROSERVICE_DIRECTORY &&
-            helm install gobench-client --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .env.SERVER_IP=$SERVER_IP --set .containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set .sshpass.rsync_server_ip_address=$BASTION_IP_ADDRESS --set .sshpass.rsync_server_login=$BASTION_LOGIN --set .sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
+            helm install gobench-client --set .env.SERVER_IP=$SERVER_IP --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set .sshpass.rsync_server_ip_address=$BASTION_IP_ADDRESS --set .sshpass.rsync_server_login=$BASTION_LOGIN --set .sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
             "
 
 
