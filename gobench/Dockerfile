@@ -1,5 +1,5 @@
 FROM ubuntu:focal
-LABEL gobench=client
+LABEL gobench=clientt
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get install -y \
     net-tools \

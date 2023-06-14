@@ -4,7 +4,7 @@ containers:
   name: nginx-server
   repo: registry.gitlab.com/polyrepo_microservices/nginx-measurement
   image_name: nginx
-  image_tag: "1.0"
+  image_tag: "1.0.0"
   imagePullSecrets:
     name: microservice-docker-registry
   imagePullPolicy: IfNotPresent

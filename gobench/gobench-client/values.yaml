@@ -2,7 +2,7 @@ containers:
   name: gobench-client
   repo: registry.gitlab.com/polyrepo_microservices/nginx-measurement
   image_name: gobench
-  image_tag: "1.0"
+  image_tag: "1.0.62"
   imagePullPolicy: IfNotPresent
   imagePullSecrets:
     name: microservice-docker-registry
@@ -22,14 +22,15 @@ securityContext:
 
 env:
   NODE_SELECTOR: worker-node01
-  SERVER_IP: 
+  SERVER_IP: 172.16.87.208
 
 ## This is name of folder which files are extracted in bastion host ##
 
 folder:
-  name: Nginx_Result
+  name: /home/vagrant/logs/nginx_measurement
 
 
 sshpass:
-  rsync_server: ""
-  rsync_password:
+  rsync_server_ip_address: ""
+  rsync_server_login: ""
+  rsync_server_password: ""
