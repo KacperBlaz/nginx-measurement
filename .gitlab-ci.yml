@@ -67,16 +67,13 @@ build_gobench:
     - bastion
     - shell
   before_script:
-    - export KUBECONFIG=/home/vagrant/.kube/kubeconfig
+    - export KUBECONFIG=/home/vagrant/.kube/config
     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
     - chmod 400 deploy-key.pem
     - export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
-    - echo $SERVER_IP
   script:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
-            env | grep SERVER_IP &&
-            export KUBECONFIG=/home/vagrant/.kube/config &&
             kubectl get pods &&
             export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"') &&
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
