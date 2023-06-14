@@ -10,8 +10,8 @@ spec:
       annotations:
     spec:
       imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
-      imagePullSecrets:
-      - name: {{ .Values.containers.imagePullSecrets.name }}
+#      imagePullSecrets:
+#      - name: {{ .Values.containers.imagePullSecrets.name }}
       containers:
       - name: {{ .Values.image.name }}
         image: {{ .Values.containers.repo }}/{{ .Values.containers.image_name }}/{{ .Values.containers.image_tag }}
