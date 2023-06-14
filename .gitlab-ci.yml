@@ -57,7 +57,7 @@ build_gobench:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            cd /home/vagrant/gitlab_nginx/nginx-measurement/nginx &&
+            cd /home/vagrant/gitlab_nginx/nginx-measurement/$MICROSERVICE_DIRECTORY &&
             helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
             "
 
@@ -73,9 +73,10 @@ build_gobench:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
             export KUBECONFIG=$KUBERNETES_CONF
+            kubectl get pods
+            export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            cd /home/vagrant/gitlab_nginx/nginx-measurement/nginx &&
-            echo "Taking Calico IP address";export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
+            cd /home/vagrant/gitlab_nginx/nginx-measurement/$MICROSERVICE_DIRECTORY &&
             helm install gobench-client --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .env.SERVER_IP=$SERVER_IP --set .containers.tag=$MICROSERVICE_IMAGE_VERSION --set .sshpass.rsync_server_ip_address=$BASTION_IP_ADDRESS --set .sshpass.rsync_server_login=$BASTION_LOGIN --set .sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
             "
 
