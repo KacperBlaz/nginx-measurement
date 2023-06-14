@@ -62,7 +62,7 @@ run_nginx_server:
     - chmod 400 deploy-key.pem
   script:
       - |-
-          ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS '
+          ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
             docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
             cd /home/vagrant/gitlab_nginx/nginx-measurement/nginx &&
             if [ -z "$CI_JOB_NAME=build_nginx" ]; then
@@ -70,7 +70,7 @@ run_nginx_server:
             else
               helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  nginx-server/
             fi
-          '
+          "
 #kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
 #         - ls -la
 #         - cd $MICROSERVICE_DIRECTORY
