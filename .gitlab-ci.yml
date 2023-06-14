@@ -94,8 +94,8 @@ run_gobench_client:
   extends:
     - .run_gobench_client
   tags:
-    - bastion
-    - shell
+    - cluster
+    - kubernetes
   variables:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
