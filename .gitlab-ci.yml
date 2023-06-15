@@ -50,7 +50,7 @@ build_gobench:
 ## Integrate repo on server with cluster
 
 env_integration:
-  image: lachlanevenson:k8s-kubectl
+  image: bitnami/kubectl:latest
   stage: integration
   tags:
     - agent
