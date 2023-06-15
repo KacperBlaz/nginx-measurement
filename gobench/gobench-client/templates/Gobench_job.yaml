@@ -27,10 +27,11 @@ spec:
           - |
             date;/usr/bin/gobench -t 60 -c 100 -u http://{{ .Values.env.SERVER_IP }}/  > /mnt/$SERVER_IP.result.txt
             sshpass -p {{ .Values.sshpass.rsync_server_password }} scp -q -o StrictHostKeyChecking=no /mnt/$SERVER_IP.result.txt {{ .Values.sshpass.rsync_server_login }}@{{ .Values.sshpass.rsync_server_ip }}:{{ .Values.folder.name }}
-            if [ $? -eq 0 ]; then
-              echo $SERVER_IP.result.txt was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}
+            if [ $? -eq 0 ]
+            then
+            echo $SERVER_IP.result.txt was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}
             else
-              issue occured when transfering results to Jumphost
+            issue occured when transfering results to Jumphost
             fi
             cat /mnt/$SERVER_IP.result.txt
       restartPolicy: {{ .Values.containers.restartPolicy }}
