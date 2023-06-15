@@ -61,8 +61,7 @@ env_integration:
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
             echo "Creating docker registry and cloning repo &&
             kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
-            git clone https://github.com/Joginator4/nginx-measurement.git
-            "
+            git clone https://github.com/Joginator4/nginx-measurement.git "
 
 
 .run_nginx_server:
