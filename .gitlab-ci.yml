@@ -56,12 +56,13 @@ env_integration:
   - export KUBECONFIG=$KUBERNETES_CONF
   - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
   - chmod 400 deploy-key.pem
+  - git clone https://github.com/Joginator4/nginx-measurement.git
   script:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
             echo "Creating docker registry and cloning repo" &&
             kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
-            git clone https://github.com/Joginator4/nginx-measurement.git
+            scp -q -o StrictHostKeyChecking=no -r $BASTION_LOGIN@$BASTION_IP_ADDRESS:$CI_BUILDS_DIR/nginx-measurement vagrant@$MASTER_IP_ADDRESS:~
             "
 
 
