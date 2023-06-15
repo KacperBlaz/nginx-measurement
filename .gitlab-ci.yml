@@ -1,6 +1,6 @@
 stages:
   - build
-#  - integration
+  - integration
   - deploy
   - undeploy
 
