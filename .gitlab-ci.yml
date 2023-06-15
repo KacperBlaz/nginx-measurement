@@ -1,14 +1,18 @@
 stages:
   - build
-  - test
+  - integration
   - deploy
+  - undeploy
 
 variables:
   MASTER_KEY: $MASTER_NODE_PRIVATE_KEY
   MICROSERVICE_DIRECTORY: ""
   MICROSERVICE_NAME: ""
   MICROSERVICE_IMAGE_NAME: $CI_REGISTRY_IMAGE/$MICROSERVICE_NAME
+  MICROSERVICE_REPO: "https://github.com/Joginator4/nginx-measurement.git"
   MICROSERVICE_IMAGE_VERSION: "1.0.0"
+  NGINX_CHART_NAME:  nginx-server
+  GOBENCH_CHART_NAME: gobench-client
   CHART_FOLDER: ""
 
 
@@ -43,9 +47,28 @@ build_gobench:
     MICROSERVICE_NAME: gobench
     MICROSERVICE_DIRECTORY: gobench
 
+env_integration:
+  stage: integration
+  tags:
+    - bastion
+    - shell
+  before_script:
+  - export KUBECONFIG=$KUBERNETES_CONF
+  - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
+  - chmod 400 deploy-key.pem
+  script:
+      - |-
+          ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
+            echo "Creating docker registry and cloning repo &&
+            kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
+            git clone https://github.com/Joginator4/nginx-measurement.git &&
+            "
+
 
 .run_nginx_server:
-  stage: test
+  stage: deploy
+  dependencies:
+    - env_integration
   tags:
     - bastion
     - shell
@@ -56,16 +79,18 @@ build_gobench:
   script:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            cd /home/vagrant/gitlab_nginx/nginx-measurement/$MICROSERVICE_DIRECTORY &&
-            helm install nginx-server --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
+            cd $PWD/nginx-measurement/$MICROSERVICE_DIRECTORY &&
+            helm install $NGINX_CHART_NAME --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
             "
 
 .run_gobench_client:
-  stage: test
+  stage: deploy
   tags:
     - bastion
     - shell
+  dependencies:
+    - env_integration
+    - run_nginx_server
   before_script:
     - export KUBECONFIG=/home/vagrant/.kube/config
     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
@@ -74,30 +99,43 @@ build_gobench:
   script:
       - |-
           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
-            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
-            cd /home/vagrant/gitlab_nginx/nginx-measurement/$MICROSERVICE_DIRECTORY &&
-            helm install gobench-client --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
+            cd $PWD/nginx-measurement/$MICROSERVICE_DIRECTORY &&
+            helm install g$GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
             "
 
 
 run_nginx_server:
   extends:
     - .run_nginx_server
-  stage: deploy
   variables:
     MICROSERVICE_DIRECTORY: nginx
     CHART_FOLDER: nginx-server/
 
 run_gobench_client:
-  stage: deploy
   extends:
     - .run_gobench_client
-  tags:
-    - bastion
-    - shell
   variables:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
+
+# remove_after_run:
+#   stage: undeploy
+#   dependencies:
+#     - env_integration
+#     - run_nginx_server
+#     - run_gobench_client
+#   before_script:
+#     - export KUBECONFIG=/home/vagrant/.kube/config
+#     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
+#     - chmod 400 deploy-key.pem
+#     - export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
+#   script:
+#       - |-
+#           ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
+#           helm uninstall $NGINX_CHART_NAME $GOBENCH_CHART_NAME
+
+
+#            docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
 #kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
 #         - ls -la
 ##         - cd $MICROSERVICE_DIRECTORY
