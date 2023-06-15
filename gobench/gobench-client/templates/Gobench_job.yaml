@@ -29,7 +29,7 @@ spec:
             sshpass -p {{ .Values.sshpass.rsync_server_password }} scp -q -o StrictHostKeyChecking=no /mnt/$SERVER_IP.result.txt {{ .Values.sshpass.rsync_server_login }}@{{ .Values.sshpass.rsync_server_ip }}:{{ .Values.folder.name }}
             if [ $? -eq 0 ]
             then
-            echo $SERVER_IP.result.txt was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}
+            echo results was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}, Name of file : $SERVER_IP.result.txt
             else
             issue occured when transfering results to Jumphost
             fi
