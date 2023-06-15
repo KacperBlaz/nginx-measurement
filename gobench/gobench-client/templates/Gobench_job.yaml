@@ -32,7 +32,6 @@ spec:
             else
               issue occured when transfering results to Jumphost
             cat /mnt/$SERVER_IP.result.txt
-            sleep infinity
       restartPolicy: {{ .Values.containers.restartPolicy }}
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.env.NODE_SELECTOR }}
