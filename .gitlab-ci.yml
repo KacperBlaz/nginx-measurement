@@ -53,7 +53,7 @@ env_integration:
   image: bitnami/kubectl:latest
   stage: integration
   variables:
-    NAMESPACE: default
+    NAMESPACE: gitlab-runner
   tags:
     - agent
     - kubernetes
@@ -65,6 +65,7 @@ env_integration:
       - |-
           ls
           echo "Creating docker registry and cloning repo"
+          kubectl get pods
           kubectl -n $NAMESPACE create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f -
           helm ls
 
