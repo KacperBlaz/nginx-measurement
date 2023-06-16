@@ -102,7 +102,6 @@ env_integration:
     - export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
   script:
       - |-
-          cat $SERVER_IP
           cd $MICROSERVICE_DIRECTORY &&
           helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
 
