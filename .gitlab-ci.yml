@@ -1,3 +1,6 @@
+image: dtzar/helm-kubectl
+
+
 stages:
   - build
   - integration
@@ -50,7 +53,6 @@ build_gobench:
 ## Integrate repo on server with cluster
 
 env_integration:
-  image: bitnami/kubectl:latest
   stage: integration
 #  variables:
 #    NAMESPACE: default
@@ -74,24 +76,23 @@ env_integration:
   needs:
     - env_integration
   tags:
-    - bastion
-    - shell
+    - kubernetes
+    - agent
   before_script:
     - export KUBECONFIG=$KUBERNETES_CONF
     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
     - chmod 400 deploy-key.pem
+    - git clone $MICROSERVICE_REPO
   script:
       - |-
-          ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
-            cd ~/nginx-measurement/$MICROSERVICE_DIRECTORY &&
-            helm install $NGINX_CHART_NAME --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
-            "
+          cd ~/nginx-measurement/$MICROSERVICE_DIRECTORY &&
+          helm install $NGINX_CHART_NAME --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
 
 .run_gobench_client:
   stage: deploy
   tags:
-    - bastion
-    - shell
+    - kubernetes
+    - agent
   needs:
     - env_integration
     - run_nginx_server
@@ -100,12 +101,11 @@ env_integration:
     - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
     - chmod 400 deploy-key.pem
     - export SERVER_IP=$(kubectl get pods -l app=nginx -o json | jq '.items[] | .status | .podIP' | tr -d '"')
+    - git clone $MICROSERVICE_REPO
   script:
       - |-
-          ssh -tt -o StrictHostKeyChecking=no -i deploy-key.pem vagrant@$MASTER_IP_ADDRESS "
-            cd ~/nginx-measurement/$MICROSERVICE_DIRECTORY &&
-            helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
-            "
+          cd ~/nginx-measurement/$MICROSERVICE_DIRECTORY &&
+          helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
 
 
 run_nginx_server:
@@ -144,3 +144,4 @@ run_gobench_client:
 #         - ls -la
 ##         - cd $MICROSERVICE_DIRECTORY
 ##         - helm install nginx-server nginx-server/ &&
+# 
