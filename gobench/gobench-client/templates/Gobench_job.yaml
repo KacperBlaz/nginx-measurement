@@ -31,7 +31,7 @@ spec:
             then
             echo results was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}, Name of file : $SERVER_IP.result.txt
             else
-            issue occured when transfering results to Jumphost
+            echo "issue occured when transfering results to Jumphost. Please check hostname and ip address"
             fi
             cat /mnt/$SERVER_IP.result.txt
       restartPolicy: {{ .Values.containers.restartPolicy }}
