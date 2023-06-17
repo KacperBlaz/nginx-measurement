@@ -16,8 +16,10 @@ variables:
   MICROSERVICE_IMAGE_VERSION: "1.0.0"
   NGINX_CHART_NAME:  nginx-server
   GOBENCH_CHART_NAME: gobench-client
+  BASTION_LOG_FOLDER: "/home/vagrant/logs/nginx_measurement"
   CHART_FOLDER: ""
 
+#IMAGE BUILD
 
 .build_image:
   stage: build
@@ -54,15 +56,9 @@ build_gobench:
 
 env_integration:
   stage: integration
-#  variables:
-#    NAMESPACE: default
   tags:
     - agent
     - kubernetes
-#  before_script:
-#  - export KUBECONFIG=$KUBERNETES_CONF
-#  - cat $MASTER_KEY | sed -e "s/-----BEGIN OPENSSH PRIVATE KEY-----/&\n/" -e "s/-----END OPENSSH PRIVATE KEY-----/&\n/" -e "s/\S\{64\}/&\n/g"\ > deploy-key.pem
-##  - chmod 400 deploy-key.pem
   script:
       - |-
           ls
@@ -86,7 +82,11 @@ env_integration:
       - |-
           cd $MICROSERVICE_DIRECTORY &&
           helm install $NGINX_CHART_NAME --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
-
+          echo "Waiting for $NGINX_CHART_NAME to be running";sleep 20
+          if kubectl get pods -l app=nginx| grep "Running"; then
+            echo "$NGINX_CHART_NAME is running Successfuly!"
+          else
+            echo "$NGINX_CHART_NAME is not running Succesfully."
 .run_gobench_client:
   stage: deploy
   tags:
@@ -103,8 +103,15 @@ env_integration:
   script:
       - |-
           cd $MICROSERVICE_DIRECTORY &&
-          helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
-
+          helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set folder.name=$BASTION_LOG_FOLDER --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
+          echo "Waiting for $GOBENCH_CHART_NAME to be running";sleep 20
+          if kubectl get pods -l app=gobench-client | grep "Running"; then
+            echo "$GOBENCH_CHART_NAME is running Successfuly!"
+          else
+            echo "$GOBENCH_CHART_NAME is not running Succesfully."
+  artifacts:
+    paths:
+      - build.env
 
 run_nginx_server:
   extends:
@@ -119,6 +126,39 @@ run_gobench_client:
   variables:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
+
+check_result_transfer:
+  stage: deploy
+  tags:
+    - bastion
+    - shell
+  dependencies:
+    - run_gobench_client
+  when: delayed
+  start_in: 5 minutes
+  script:
+      - |-
+          source build.env
+          cd $BASTION_LOG_FOLDER
+          if ls | grep $SERVER_IP; then
+            echo "Results are in log folder"
+          else
+            echo "Results are not in log folder"
+
+
+undeploy_charts:
+  stage: undeploy
+  tags:
+    - kubernetes
+    - agent
+  needs:
+    - check_result_transfer
+  before_script:
+    - export KUBECONFIG=$KUBERNETES_CONF
+    - echo "Removing helm charts after checking that results are in bastion host"
+  script:
+        - |-
+            helm uninstall $GOBENCH_CHART_NAME $NGINX_CHART_NAME
 
 # remove_after_run:
 #   stage: undeploy
