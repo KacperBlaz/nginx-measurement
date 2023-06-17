@@ -87,6 +87,7 @@ env_integration:
             echo "$NGINX_CHART_NAME is running Successfuly!"
           else
             echo "$NGINX_CHART_NAME is not running Succesfully."
+          fi
 .run_gobench_client:
   stage: deploy
   tags:
@@ -109,6 +110,7 @@ env_integration:
             echo "$GOBENCH_CHART_NAME is running Successfuly!"
           else
             echo "$GOBENCH_CHART_NAME is not running Succesfully."
+          fi
   artifacts:
     paths:
       - build.env
@@ -144,6 +146,7 @@ check_result_transfer:
             echo "Results are in log folder"
           else
             echo "Results are not in log folder"
+          fi
 
 
 undeploy_charts:
