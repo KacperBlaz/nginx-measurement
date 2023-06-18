@@ -111,9 +111,9 @@ env_integration:
           else
             echo "$GOBENCH_CHART_NAME is not running Succesfully."
           fi
-  # artifacts:
-  #   paths:
-  #     - build.env
+  artifacts:
+    paths:
+      - build.env
 
 run_nginx_server:
   extends:
@@ -129,24 +129,26 @@ run_gobench_client:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
 
-# check_result_transfer:
-#   stage: deploy
-#   tags:
-#     - bastion
-#     - shell
-#   dependencies:
-#     - run_gobench_client
-#   when: delayed
-#   start_in: 5 minutes
-#   script:
-#       - |-
-#           source build.env
-#           cd $BASTION_LOG_FOLDER
-#           if ls | grep $SERVER_IP; then
-#             echo "Results are in log folder"
-#           else
-#             echo "Results are not in log folder"
-#           fi
+check_result_transfer:
+  stage: deploy
+  tags:
+    - bastion
+    - shell
+  dependencies:
+    - run_gobench_client
+  when: delayed
+  start_in: 5 minutes
+  before_script:
+    - ls
+    - source build.env
+  script:
+      - |-
+          cd $BASTION_LOG_FOLDER
+          if ls | grep $SERVER_IP; then
+            echo "Results are in log folder"
+          else
+            echo "Results are not in log folder"
+          fi
 
 
 # undeploy_charts:
