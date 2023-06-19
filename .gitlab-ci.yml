@@ -160,7 +160,7 @@ undeploy_test:
     - export KUBECONFIG=$KUBERNETES_CONF
   script:
       - |-
-          if kubectl get pods -l app=gobench-client | grep "Completed"; then
+          if kubectl get jobs -l app=gobench-client | grep "1/1"; then
             echo "Measurement of RPS by $GOBENCH_CHART_NAME completed!"
             helm uninstall $GOBENCH_CHART_NAME $NGINX_CHART_NAME
           else
