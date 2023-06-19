@@ -5,7 +5,8 @@ stages:
   - build
   - integration
   - deploy
-  - undeploy
+  - cleanup_on_failure
+  - cleanup
 
 variables:
   MASTER_KEY: $MASTER_NODE_PRIVATE_KEY
@@ -87,6 +88,7 @@ env_integration:
             echo "$NGINX_CHART_NAME is running Successfuly!"
           else
             echo "$NGINX_CHART_NAME is not running Succesfully."
+            exit 2
           fi
 .run_gobench_client:
   stage: deploy
@@ -109,11 +111,9 @@ env_integration:
           if kubectl get pods -l app=gobench-client | grep "Running"; then
             echo "$GOBENCH_CHART_NAME is running Successfuly!"
           else
-            echo "$GOBENCH_CHART_NAME is not running Succesfully."
+            echo "$GOBENCH_CHART_NAME is not running Succesfully. Removing pod"
+            exit 2
           fi
-  artifacts:
-    paths:
-      - build.env
 
 run_nginx_server:
   extends:
@@ -122,6 +122,36 @@ run_nginx_server:
     MICROSERVICE_DIRECTORY: nginx
     CHART_FOLDER: nginx-server/
 
+cleanup_nginx_server:
+  tags:
+    - kubernetes
+    - agent
+  stage: cleanup_on_failure
+  needs:
+    - run_nginx_server
+  when: on_failure
+  before_script:
+    - export KUBECONFIG=$KUBERNETES_CONF
+  script:
+      - |-
+          Deploying $NGINX_CHART_NAME failed, uninstalling ...
+          helm uninstall $NGINX_CHART_NAME
+
+cleanup_gobench_client:
+  tags:
+    - kubernetes
+    - agent
+  stage: cleanup_on_failure
+  needs:
+    - run_gobench_client
+  when: on_failure
+  before_script:
+    - export KUBECONFIG=$KUBERNETES_CONF
+  script:
+      - |-
+          Deploying $GOBENCH_CHART_NAME failed, uninstalling ...
+          helm uninstall $GOBENCH_CHART_NAME
+
 run_gobench_client:
   extends:
     - .run_gobench_client
@@ -129,25 +159,24 @@ run_gobench_client:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
 
-check_result_transfer:
-  stage: deploy
+undeploy_test:
+  stage: cleanup
   tags:
-    - bastion
-    - shell
+    - kubernetes
+    - agent
   needs:
     - run_gobench_client
-#  when: delayed
-#  start_in: 3 minutes
+  when: delayed
+  start_in: 3 minutes
   before_script:
-    - ls
-    - source build.env
+    - export KUBECONFIG=$KUBERNETES_CONF
   script:
       - |-
-          cd $BASTION_LOG_FOLDER
-          if ls | grep $SERVER_IP; then
-            echo "Results are in log folder"
+          if kubectl get pods -l app=gobench-client | grep "Completed"; then
+            echo "Measurement of RPS by $GOBENCH_CHART_NAME completed!"
+            helm uninstall $GOBENCH_CHART_NAME $NGINX_CHART_NAME
           else
-            echo "Results are not in log folder"
+            echo "ERROR!, $GOBENCH_CHART_NAME not completed successfully"
           fi
 
 
