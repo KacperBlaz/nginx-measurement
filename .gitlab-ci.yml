@@ -83,8 +83,8 @@ env_integration:
       - |-
           cd $MICROSERVICE_DIRECTORY &&
           helm install $NGINX_CHART_NAME --set .imageCredentials.registry=$CI_REGISTRY --set .imageCredentials.username=$CI_REGISTRY_USER --set .image.Credentials.password=$CI_REGISTRY_PASSWORD --set .containers.tag=$MICROSERVICE_IMAGE_VERSION  $CHART_FOLDER
-          echo "Waiting for $NGINX_CHART_NAME to be running";sleep 20
-          if kubectl get pods -l app=nginx| grep "Running"; then
+          echo "Waiting for $NGINX_CHART_NAME to be running";sleep 40
+          if kubectl get pods -l app=nginx | grep "Running"; then
             echo "$NGINX_CHART_NAME is running Successfuly!"
           else
             echo "$NGINX_CHART_NAME is not running Succesfully."
@@ -107,11 +107,11 @@ env_integration:
       - |-
           cd $MICROSERVICE_DIRECTORY &&
           helm install $GOBENCH_CHART_NAME --set env.SERVER_IP=$SERVER_IP --set folder.name=$BASTION_LOG_FOLDER --set imageCredentials.registry=$CI_REGISTRY --set imageCredentials.username=$CI_REGISTRY_USER --set imageCredentials.password=$CI_REGISTRY_PASSWORD --set containers.image_tag=$MICROSERVICE_IMAGE_VERSION --set sshpass.rsync_server_ip=$BASTION_IP_ADDRESS --set sshpass.rsync_server_login=$BASTION_LOGIN --set sshpass.rsync_server_password=$BASTION_PASSWORD $CHART_FOLDER
-          echo "Waiting for $GOBENCH_CHART_NAME to be running";sleep 20
+          echo "Waiting for $GOBENCH_CHART_NAME to be running";sleep 40
           if kubectl get pods -l app=gobench-client | grep "Running"; then
             echo "$GOBENCH_CHART_NAME is running Successfuly!"
           else
-            echo "$GOBENCH_CHART_NAME is not running Succesfully. Removing pod"
+            echo "$GOBENCH_CHART_NAME is not running Succesfully."
             exit 2
           fi
 
@@ -122,35 +122,6 @@ run_nginx_server:
     MICROSERVICE_DIRECTORY: nginx
     CHART_FOLDER: nginx-server/
 
-cleanup_nginx_server:
-  tags:
-    - kubernetes
-    - agent
-  stage: cleanup_on_failure
-  needs:
-    - run_nginx_server
-  when: on_failure
-  before_script:
-    - export KUBECONFIG=$KUBERNETES_CONF
-  script:
-      - |-
-          Deploying $NGINX_CHART_NAME failed, uninstalling ...
-          helm uninstall $NGINX_CHART_NAME
-
-cleanup_gobench_client:
-  tags:
-    - kubernetes
-    - agent
-  stage: cleanup_on_failure
-  needs:
-    - run_gobench_client
-  when: on_failure
-  before_script:
-    - export KUBECONFIG=$KUBERNETES_CONF
-  script:
-      - |-
-          Deploying $GOBENCH_CHART_NAME failed, uninstalling ...
-          helm uninstall $GOBENCH_CHART_NAME
 
 run_gobench_client:
   extends:
@@ -158,6 +129,23 @@ run_gobench_client:
   variables:
     MICROSERVICE_DIRECTORY: gobench
     CHART_FOLDER: gobench-client/
+
+cleanup_on_failure:
+  tags:
+    - kubernetes
+    - agent
+  stage: cleanup_on_failure
+  rules:
+    - exists:
+      - run_nginx_server
+      - run_gobench_client
+    - when: on_failure
+  before_script:
+    - export KUBECONFIG=$KUBERNETES_CONF
+  script:
+      - |-
+          echo "Deploying Measurement test failed, uninstalling ...""
+          helm uninstall $NGINX_CHART_NAME $GOBENCH_CHART_NAME
 
 undeploy_test:
   stage: cleanup
