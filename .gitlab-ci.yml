@@ -53,7 +53,7 @@ build_gobench:
     MICROSERVICE_NAME: gobench
     MICROSERVICE_DIRECTORY: gobench
 
-## Integrate repo on server with cluster
+### Integrate repo on server with cluster
 
 env_integration:
   stage: integration
