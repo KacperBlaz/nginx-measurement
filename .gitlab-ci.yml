@@ -134,10 +134,10 @@ check_result_transfer:
   tags:
     - bastion
     - shell
-  dependencies:
+  needs:
     - run_gobench_client
-  when: delayed
-  start_in: 5 minutes
+#  when: delayed
+#  start_in: 3 minutes
   before_script:
     - ls
     - source build.env
