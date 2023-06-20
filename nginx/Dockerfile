@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:focal as builder
 LABEL nginx=server
 RUN apt update -y && apt install nginx -y \
     net-tools -y \
