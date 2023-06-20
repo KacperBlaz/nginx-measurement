@@ -1,5 +1,5 @@
 FROM ubuntu:focal as builder
-LABEL nginx=server
+LABEL nginx=serverr
 RUN apt update -y && apt install nginx -y \
     net-tools -y \
     ethtool -y

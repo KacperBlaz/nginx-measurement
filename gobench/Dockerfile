@@ -14,7 +14,7 @@
 # RUN go get github.com/cmpxchg16/gobench
 # RUN mv ./go/bin/gobench /usr/bin && rm -rf ./go
 FROM ubuntu:focal as builder
-LABEL gobench=clientt
+LABEL gobench=clienttt
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get install -y \
     net-tools \
