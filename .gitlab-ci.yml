@@ -203,5 +203,5 @@ undeploy_test:
 #kubectl create secret docker-registry microservice-docker-registry --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$CI_REGISTRY_PASSWORD --dry-run=client -o yaml | kubectl apply -f - &&
 #         - ls -la
 ##         - cd $MICROSERVICE_DIRECTORY
-##         - helm install nginx-server nginx-server/ &&
+###         - helm install nginx-server nginx-server/ &&
 # 
