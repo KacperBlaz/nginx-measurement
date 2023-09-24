@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gobench-client-{{ .Release.Name }}
+  labels:
+    app: gobench-client
+spec:
+  template:
+    metadata:
+      annotations:
+    spec:
+#      imagePullSecrets:
+#      - name: {{ .Values.containers.imagePullSecrets.name }}
+      containers:
+      - name: {{ .Values.containers.name }}
+        imagePullPolicy: {{ .Values.containers.imagePullPolicy }}
+        image: {{ .Values.containers.repo }}/{{ .Values.containers.image_name }}/{{ .Values.containers.image_tag }}
+        env:
+        - name: SERVER_IP
+          value: {{ .Values.env.SERVER_IP }}
+        securityContext:
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalataion }}
+          privileged: {{ .Values.securityContext.privileged }}
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+        command: [ "/bin/bash", "-c"]
+        args:
+          - |
+            date;/usr/bin/gobench -t 60 -c 100 -u http://{{ .Values.env.SERVER_IP }}/  > /mnt/$SERVER_IP.result.txt
+            sshpass -p {{ .Values.sshpass.rsync_server_password }} scp -q -o StrictHostKeyChecking=no /mnt/$SERVER_IP.result.txt {{ .Values.sshpass.rsync_server_login }}@{{ .Values.sshpass.rsync_server_ip }}:{{ .Values.folder.name }}
+            if [ $? -eq 0 ]
+            then
+            echo results was transfered to {{ .Values.sshpass.rsync_server_ip }} in folder {{ .Values.folder.name }}, Name of file : $SERVER_IP.result.txt
+            else
+            echo "issue occured when transfering results to Jumphost. Please check hostname and ip address"
+            fi
+            cat /mnt/$SERVER_IP.result.txt
+      restartPolicy: {{ .Values.containers.restartPolicy }}
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.env.NODE_SELECTOR }}

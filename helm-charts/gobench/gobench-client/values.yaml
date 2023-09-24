@@ -1,0 +1,36 @@
+containers:
+  name: gobench-client
+  repo: registry.gitlab.com/polyrepo_microservices/nginx-measurement
+  image_name: gobench
+  image_tag: "1.0.62"
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+    name: microservice-docker-registry
+  restartPolicy: Never
+
+# Username and password are not real here , password are provided in pipeline to be dont shared !
+
+imageCredentials:
+  registry: registry.gitlab.com/polyrepo_microservices/nginx-measurement/
+  username: admin
+  password: admin123
+
+securityContext:
+  allowPrivilegeEscalation: true
+  privileged: true
+  runAsUser: 0
+
+env:
+  NODE_SELECTOR: worker-node01
+  SERVER_IP: "172.16.87.218"
+
+## This is name of folder which files are extracted in bastion host ##
+
+folder:
+  name: /home/vagrant/logs/nginx_measurement
+
+
+sshpass:
+  rsync_server_ip: "192.168.0.121"
+  rsync_server_login: "admin"
+  rsync_server_password: "admin123"

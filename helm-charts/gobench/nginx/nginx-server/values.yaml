@@ -1,0 +1,26 @@
+replicas: 1
+
+containers:
+  name: nginx-server
+  repo: registry.gitlab.com/polyrepo_microservices/nginx-measurement
+  image_name: nginx
+  image_tag: "1.0.0"
+  imagePullSecrets:
+    name: microservice-docker-registry
+  imagePullPolicy: IfNotPresent
+  container_port: 80
+
+# Username and password are not real here , password are provided in pipeline to be dont shared !
+
+imageCredentials:
+  registry: registry.gitlab.com/polyrepo_microservices/nginx-measurement/
+  username: admin
+  password: admin123
+
+resources:
+  limits:
+    memory: 4Gi
+  requests:
+    memory: 1Gi
+
+NodeSelector: worker-node01
